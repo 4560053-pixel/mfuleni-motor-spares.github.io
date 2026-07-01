@@ -1,0 +1,78 @@
+async function loadProducts() {
+  const list = document.getElementById("productList");
+  if (!list) return;
+
+  try {
+    const response = await fetch("products.json");
+    const products = await response.json();
+    window.allProducts = products;
+    renderProducts(products);
+  } catch (error) {
+    list.innerHTML = "<p>Product list could not load. Open this page through a local server or upload it online.</p>";
+  }
+}
+
+function renderProducts(products) {
+  const list = document.getElementById("productList");
+  list.innerHTML = products.map(product => `
+    <article class="product-card">
+      <span class="badge">${product.category}</span>
+      <h3>${product.name}</h3>
+      <p>${product.desc}</p>
+      <a class="text-link" href="https://wa.me/27679111840?text=Hi%20Mfuleni%20Motor%20Spares,%20I%20would%20like%20to%20ask%20about%20${encodeURIComponent(product.name)}" target="_blank">Ask on WhatsApp →</a>
+    </article>
+  `).join("");
+}
+
+function filterProducts() {
+  const input = document.getElementById("productSearch");
+  const query = input.value.toLowerCase();
+  const filtered = window.allProducts.filter(product =>
+    product.name.toLowerCase().includes(query) ||
+    product.category.toLowerCase().includes(query) ||
+    product.desc.toLowerCase().includes(query)
+  );
+  renderProducts(filtered);
+}
+
+function toggleMenu() {
+  const menu = document.getElementById("navMenu");
+  menu.classList.toggle("open");
+}
+
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const messages = document.getElementById("messages");
+  const question = input.value.trim();
+  if (!question) return;
+
+  const user = document.createElement("p");
+  user.innerHTML = "<strong>You:</strong> " + question;
+  messages.appendChild(user);
+
+  const lower = question.toLowerCase();
+  let answer = "Thank you for your question. Please contact us on WhatsApp at +27 67 911 1840 for the fastest response.";
+
+  if (lower.includes("open") || lower.includes("time") || lower.includes("hours")) {
+    answer = "Mfuleni Motor Spares is open Monday to Saturday from 08:00 to 18:00 and Sunday from 08:00 to 16:00.";
+  } else if (lower.includes("where") || lower.includes("location") || lower.includes("address")) {
+    answer = "We are located at 28041 Umchweli Street, Mfuleni, Cape Town, South Africa, 7100.";
+  } else if (lower.includes("contact") || lower.includes("whatsapp") || lower.includes("phone")) {
+    answer = "You can contact Nkosiyazi Majola on +27 67 911 1840 or email nkosiyazi.cornelius@gmail.com.";
+  } else if (lower.includes("product") || lower.includes("stock") || lower.includes("parts")) {
+    answer = "We stock engine fluids, brake fluid, gear oil, radiator flush, spark plugs, headlights, clutch kits, suspension parts, steering wheel covers, wipers and more.";
+  } else if (lower.includes("price") || lower.includes("quote")) {
+    answer = "Please send the product name, vehicle model, and quantity needed to +27 67 911 1840 for a quote.";
+  } else if (lower.includes("delivery")) {
+    answer = "Delivery or collection can be discussed depending on your location and order size.";
+  }
+
+  const bot = document.createElement("p");
+  bot.innerHTML = "<strong>Bot:</strong> " + answer;
+  messages.appendChild(bot);
+
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
+}
+
+document.addEventListener("DOMContentLoaded", loadProducts);
